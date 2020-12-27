@@ -25,6 +25,6 @@ export class OffersPage implements OnInit {
 
     onEdit(id: string, slidingItem: IonItemSliding) {
         slidingItem.close().then();
-        this.router.navigate(['/', 'places', 'tabs', 'offers', 'edit', id]);
+        this.router.navigate(['/', 'places', 'tabs', 'offers', 'edit', id]).then();
     }
 }
