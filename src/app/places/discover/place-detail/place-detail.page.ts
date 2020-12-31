@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {ModalController, NavController} from '@ionic/angular';
+import {ActionSheetController, ModalController, NavController} from '@ionic/angular';
 import {NewBookingComponent} from '../../../bookings/new-booking/new-booking.component';
 import {PlacesService} from '../../places.service';
 import {ActivatedRoute} from '@angular/router';
@@ -18,7 +18,8 @@ export class PlaceDetailPage implements OnInit {
         private navCtrl: NavController,
         private modalCtrl: ModalController,
         private placesService: PlacesService,
-        private route: ActivatedRoute
+        private route: ActivatedRoute,
+        private actionSheetCtrl: ActionSheetController
     ) {
     }
 
@@ -33,6 +34,29 @@ export class PlaceDetailPage implements OnInit {
     }
 
     onBookPlace() {
+        this.actionSheetCtrl.create({
+            header: 'Choose an Action',
+            buttons: [
+                {
+                    text: 'Select Date',
+                    handler: () => this.openBookingModel('current')
+                },
+                {
+                    text: 'Select Random',
+                    handler: () => this.openBookingModel('random')
+                },
+                {
+                    text: 'Cancel',
+                    role: 'cancel'
+                }
+            ]
+        }).then(actionSheetEl => {
+            actionSheetEl.present().then();
+        });
+
+    }
+
+    openBookingModel(mode: 'current' | 'random') {
         this.modalCtrl.create({
             component: NewBookingComponent,
             componentProps: {selectedPlace: this.place}
