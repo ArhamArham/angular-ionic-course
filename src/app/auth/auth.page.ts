@@ -11,6 +11,7 @@ import {NgForm} from '@angular/forms';
 })
 export class AuthPage implements OnInit {
     isLoading = false;
+    isLogin = true;
 
     constructor(
         private authService: AuthService,
@@ -34,10 +35,23 @@ export class AuthPage implements OnInit {
                     this.router.navigateByUrl('/places/tabs/discover').then();
                 }, 1500);
             });
-
     }
 
-    onSubmit(f: NgForm) {
-        console.log(f);
+    onSubmit(form: NgForm) {
+        if (!form.valid) {
+            return;
+        }
+        const {email, password} = form.value;
+        console.log(email, password);
+        if (this.isLogin) {
+            // send login req
+            this.onLogin();
+        } else {
+            // send sign up req
+        }
+    }
+
+    onSwitchAuthMode() {
+        this.isLogin = !this.isLogin;
     }
 }
