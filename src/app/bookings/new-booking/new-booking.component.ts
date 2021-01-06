@@ -40,7 +40,18 @@ export class NewBookingComponent implements OnInit {
     }
 
     onBookPlace() {
-        this.modalCtrl.dismiss({message: 'This is dummy message'}, 'confirm').then();
+        if (!this.form.valid || !this.isDatesValid) {
+            return;
+        }
+        this.modalCtrl.dismiss({
+            bookingData: {
+                firstName: this.form.value.first_name,
+                lastName: this.form.value.last_name,
+                guestNumber: this.form.value.guest_number,
+                startDate: new Date(this.form.value.date_from),
+                endDate: new Date(this.form.value.date_to),
+            }
+        }, 'confirm').then();
     }
 
     isDatesValid() {

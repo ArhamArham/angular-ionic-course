@@ -18,7 +18,7 @@ export class PlacesService {
             200,
             new Date('2020-01-01'),
             new Date('2021-01-03'),
-            'arham'
+            'arham1'
         ),
         new Place(
             '2',
