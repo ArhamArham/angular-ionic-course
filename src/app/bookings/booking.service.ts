@@ -2,33 +2,44 @@ import {Injectable} from '@angular/core';
 import {Booking} from './booking.model';
 import {BehaviorSubject} from 'rxjs';
 import {AuthService} from '../auth/auth.service';
-import {delay, take, tap} from 'rxjs/operators';
+import {delay, map, switchMap, take, tap} from 'rxjs/operators';
+import {HttpClient} from '@angular/common/http';
+
+interface BookingData {
+    bookedFrom: string;
+    bookedTo: string;
+    firstName: string;
+    guestNumber: number;
+    lastName: string;
+    placeId: string;
+    placeImage: string;
+    placeTitle: string;
+    userId: string;
+}
 
 @Injectable({
     providedIn: 'root'
 })
+
 export class BookingService {
 
     // tslint:disable-next-line:variable-name
-    private _bookings = new BehaviorSubject<Booking[]>([
-        new Booking(
-            '1',
-            'p1',
-            '2',
-            'Hello place title',
-            'https://images.unsplash.com/photo-1602526211878-5a18d013bc58?ixid=MXwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1011&q=80',
-            'arham',
-            'rahim',
-            2,
-            new Date(),
-            new Date()
-        )
-    ]);
+    private _bookings = new BehaviorSubject<Booking[]>([]);
+
     get bookings() {
         return this._bookings.asObservable();
     }
 
-    addBooking(placeId: string, placeTitle: string, placeImage: string, firstName: string, lastName: string, guestNumber: number, dateFrom: Date, dateTo: Date) {
+    addBooking(
+        placeId: string,
+        placeTitle: string,
+        placeImage: string,
+        firstName: string,
+        lastName: string,
+        guestNumber: number,
+        dateFrom: Date,
+        dateTo: Date
+    ) {
         const booking = new Booking(Math.random().toString(),
             placeId,
             this.authService.userId,
@@ -40,25 +51,77 @@ export class BookingService {
             dateFrom,
             dateTo
         );
-        return this.bookings.pipe(
-            take(1),
-            delay(1000),
-            tap(bookings => {
-                this._bookings.next(bookings.concat(booking));
-            })
-        );
+        let generatedId;
+
+        return this.http
+            .post<{ name: string }>
+            ('https://angular-ionic-course-49d8b-default-rtdb.firebaseio.com/bookings.json',
+                {...booking, id: null}
+            ).pipe(
+                switchMap(resData => {
+                    generatedId = resData.name;
+                    return this.bookings;
+                }),
+                take(1),
+                tap(bookings => {
+                    booking.id = generatedId;
+                    this._bookings.next(bookings.concat(booking));
+                })
+            );
     }
 
     cancelBooking(bookingId: string) {
-        return this.bookings.pipe(
-            take(1),
-            delay(1000),
-            tap(bookings => {
-                this._bookings.next(bookings.filter(booking => booking.id !== bookingId));
-            })
-        );
+
+        return this.http.delete
+        (`https://angular-ionic-course-49d8b-default-rtdb.firebaseio.com/bookings/${bookingId}.json`)
+            .pipe(
+                switchMap(() => {
+                    return this.bookings;
+                }),
+                take(1),
+                tap(bookings => {
+                    return this._bookings.next(bookings.filter(booking => booking.id !== bookingId));
+                })
+            );
     }
 
-    constructor(private authService: AuthService) {
+    fetchBookings() {
+        return this.http.get<{ [key: string]: BookingData }>
+        (`https://angular-ionic-course-49d8b-default-rtdb.firebaseio.com/bookings.json?orderBy="userId"&equalTo="${this.authService.userId}"`)
+            .pipe(
+                map(resData => {
+                        const bookings = [];
+                        for (const key in resData) {
+                            if (resData.hasOwnProperty(key)) {
+                                bookings.push(
+                                    new Booking(
+                                        key,
+                                        resData[key].placeId,
+                                        resData[key].userId,
+                                        resData[key].placeTitle,
+                                        resData[key].placeImage,
+                                        resData[key].firstName,
+                                        resData[key].lastName,
+                                        resData[key].guestNumber,
+                                        new Date(resData[key].bookedFrom),
+                                        new Date(resData[key].bookedTo),
+                                    )
+                                );
+                            }
+                        }
+                        return bookings;
+                    }
+                ),
+                tap(bookings => {
+                        this._bookings.next(bookings);
+                    }
+                )
+            );
+    }
+
+    constructor(
+        private authService: AuthService,
+        private http: HttpClient
+    ) {
     }
 }

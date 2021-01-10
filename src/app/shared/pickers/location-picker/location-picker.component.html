@@ -1,0 +1,14 @@
+<div>
+  <ion-spinner color="primary" *ngIf="isLoading"></ion-spinner>
+  <ion-item *ngIf="address && !isLoading">
+    <ion-label position="floating">Address</ion-label>
+    <ion-input
+            type="text"
+            [value]="address"
+    ></ion-input>
+  </ion-item>
+  <ion-button *ngIf="!address && !isLoading" color="primary" (click)="onPickLocation()">
+    <ion-icon name="map" slot="start"></ion-icon>
+    <ion-label>Select Location</ion-label>
+  </ion-button>
+</div>

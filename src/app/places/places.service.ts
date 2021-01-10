@@ -4,6 +4,7 @@ import {AuthService} from '../auth/auth.service';
 import {BehaviorSubject, of} from 'rxjs';
 import {map, switchMap, take, tap} from 'rxjs/operators';
 import {HttpClient} from '@angular/common/http';
+import {PlaceLocation} from './location.model';
 
 interface PlaceData {
     dateFrom: string;
@@ -13,6 +14,7 @@ interface PlaceData {
     price: number;
     title: string;
     userId: string;
+    location: PlaceLocation;
 }
 
 @Injectable({
@@ -46,7 +48,8 @@ export class PlacesService {
                         placeData.price,
                         new Date(placeData.dateFrom),
                         new Date(placeData.dateTo),
-                        placeData.userId
+                        placeData.userId,
+                        placeData.location
                     );
                 })
             );
@@ -69,7 +72,8 @@ export class PlacesService {
                                     resData[key].price,
                                     new Date(resData[key].dateFrom),
                                     new Date(resData[key].dateTo),
-                                    resData[key].userId
+                                    resData[key].userId,
+                                    resData[key].location
                                 )
                             );
                         }
@@ -82,7 +86,7 @@ export class PlacesService {
             );
     }
 
-    addPlace(title, description, price, dateFrom, dateTo) {
+    addPlace(title, description, price, dateFrom, dateTo, location) {
         const place = new Place(
             Math.random().toString(),
             title,
@@ -91,7 +95,8 @@ export class PlacesService {
             price,
             dateFrom,
             dateTo,
-            this.authService.userId
+            this.authService.userId,
+            location
         );
         let generatedId;
 
@@ -136,7 +141,8 @@ export class PlacesService {
                         oldPlace.price,
                         oldPlace.dateFrom,
                         oldPlace.dateTo,
-                        oldPlace.userId
+                        oldPlace.userId,
+                        oldPlace.location
                     );
                     return this.http
                         .put(`https://angular-ionic-course-49d8b-default-rtdb.firebaseio.com/offered-places/${id}.json`,
