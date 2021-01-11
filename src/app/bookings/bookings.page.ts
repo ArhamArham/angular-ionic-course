@@ -13,6 +13,7 @@ export class BookingsPage implements OnInit, OnDestroy {
 
     loadedBookings: Booking[];
     private bookingSub: Subscription;
+    isLoading = false;
 
     constructor(
         private bookingService: BookingService,
@@ -36,6 +37,13 @@ export class BookingsPage implements OnInit, OnDestroy {
                         loadingEl.dismiss().then();
                     });
             });
+    }
+
+    ionViewWillEnter() {
+        this.isLoading = true;
+        this.bookingService.fetchBookings().subscribe(() => {
+            this.isLoading = false;
+        });
     }
 
     ngOnDestroy() {
