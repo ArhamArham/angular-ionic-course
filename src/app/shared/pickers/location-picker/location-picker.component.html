@@ -1,5 +1,7 @@
 <div>
-  <ion-spinner color="primary" *ngIf="isLoading"></ion-spinner>
+  <div class="ion-text-center ion-padding-top">
+    <ion-spinner color="primary" *ngIf="isLoading"></ion-spinner>
+  </div>
   <ion-item *ngIf="address && !isLoading">
     <ion-label position="floating">Address</ion-label>
     <ion-input
@@ -7,8 +9,20 @@
             [value]="address"
     ></ion-input>
   </ion-item>
-  <ion-button *ngIf="!address && !isLoading" color="primary" (click)="onPickLocation()">
+  <ion-button
+          expand="full"
+          color="primary"
+          *ngIf="!isLoading && address"
+          (click)="onPickLocation()">
+    <ion-icon name="create" slot="icon-only"></ion-icon>
+    Edit Location
+  </ion-button>
+  <ion-button
+          expand="full"
+          color="primary"
+          *ngIf="!address && !isLoading"
+          (click)="onPickLocation()">
     <ion-icon name="map" slot="start"></ion-icon>
-    <ion-label>Select Location</ion-label>
+    Select Location
   </ion-button>
 </div>
